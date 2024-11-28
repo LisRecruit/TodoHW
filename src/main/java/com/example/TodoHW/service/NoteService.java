@@ -1,6 +1,6 @@
-package com.example.service;
+package com.example.TodoHW.service;
 
-import com.example.model.Note;
+import com.example.TodoHW.model.Note;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -1,7 +1,7 @@
 package com.example.TodoHW;
 
-import com.example.model.Note;
-import com.example.service.NoteService;
+import com.example.TodoHW.model.Note;
+import com.example.TodoHW.service.NoteService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
