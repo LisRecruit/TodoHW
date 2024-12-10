@@ -35,12 +35,20 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-	implementation group: 'org.hibernate.orm', name: 'hibernate-core', version: '6.6.1.Final'
-	implementation platform("org.hibernate.orm:hibernate-platform:6.6.1.Final")
+//	implementation group: 'org.hibernate.orm', name: 'hibernate-core', version: '6.6.1.Final'
+//	implementation platform("org.hibernate.orm:hibernate-platform:6.6.1.Final")
 	implementation "jakarta.transaction:jakarta.transaction-api"
 	implementation group: 'jakarta.validation', name: 'jakarta.validation-api', version: '3.1.0'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	// https://mvnrepository.com/artifact/org.mapstruct/mapstruct
+	implementation group: 'org.mapstruct', name: 'mapstruct', version: '1.6.3'
+	annotationProcessor group: 'org.mapstruct', name: 'mapstruct-processor', version: '1.6.3'
+
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+tasks.named('compileJava') {
+	options.annotationProcessorPath = configurations.annotationProcessor
 }

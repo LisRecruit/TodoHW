@@ -1,13 +1,17 @@
 package com.example.TodoHW.controlers;
 
 import com.example.TodoHW.model.Note;
+import com.example.TodoHW.model.dto.NoteCreateRequest;
+import com.example.TodoHW.model.dto.NoteResponse;
 import com.example.TodoHW.service.NoteService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 
 
 @Controller
@@ -20,7 +24,10 @@ public class NoteController {
 
     @GetMapping("/list")
     public String listNotes(Model model) {
-        model.addAttribute("notes", noteService.listAll());
+        int page = 0;
+        int size = 10;
+        PageRequest pageRequest = PageRequest.of(page, size);
+        model.addAttribute("notes", noteService.listAll(pageRequest));
         return "note_list";
     }
 
@@ -32,25 +39,39 @@ public class NoteController {
 
     @GetMapping("/edit")
     public String editNoteForm(@RequestParam("id") Long id, Model model) {
-        model.addAttribute("note", noteService.getById(id));
+        NoteResponse note = noteService.getById(id);
+        model.addAttribute("note", note);
         return "note_edit";
     }
 
     @PostMapping("/edit")
-    public String editNote(@ModelAttribute Note note) {
-        noteService.update(note);
+    public String editNote(@RequestParam("id") Long id, @ModelAttribute NoteCreateRequest request) {
+        noteService.update(id, request);
         return REDIRECT_TO_LIST;
     }
+
 
     @GetMapping("/add")
     public String showAddNoteForm(Model model){
         model.addAttribute("note", new Note());
         return "add_note";
     }
-    @PostMapping("/add")
-    public String addNote (@ModelAttribute("note") Note note) {
-        noteService.add(note);
-        return REDIRECT_TO_LIST;
+
+@PostMapping("/add")
+public String addNote(@Valid @ModelAttribute("note") NoteCreateRequest request,
+                      BindingResult bindingResult,
+                      Model model) {
+    if ((request.getTitle() == null || request.getTitle().isBlank()) &&
+            (request.getContent() == null || request.getContent().isBlank())) {
+        bindingResult.reject("contentOrTitle", "Please provide at least Title or Content.");
     }
+
+    if (bindingResult.hasErrors()) {
+        return "add_note";
+    }
+
+    noteService.add(request);
+    return REDIRECT_TO_LIST;
+}
 
 }

@@ -1,56 +1,61 @@
 package com.example.TodoHW.service;
 
+import com.example.TodoHW.mapper.NoteMapper;
 import com.example.TodoHW.model.Note;
+import com.example.TodoHW.model.dto.NoteCreateRequest;
+import com.example.TodoHW.model.dto.NoteResponse;
+import com.example.TodoHW.repository.NoteRepository;
+import jakarta.persistence.EntityNotFoundException;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
-
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional (readOnly = true)
 public class NoteService {
-    public Map<Long, Note> notes = new HashMap<>();
-    private Long generateId (){
-        Random random = new Random();
-        while (true){
-            Long key = random.nextLong();
-            if (!notes.containsKey(key)){
-                return key;
-            }
+    private final NoteMapper noteMapper;
+    private final NoteRepository noteRepository;
+
+    public Page<NoteResponse> listAll(PageRequest pageRequest) {
+        return noteRepository.findAll(pageRequest)
+                .map(noteMapper::toNoteResponse);
+    }
+
+    @Transactional
+    public Note add(NoteCreateRequest request) {
+
+        if ((request.getTitle() == null || request.getTitle().isBlank()) &&
+                (request.getContent() == null || request.getContent().isBlank())) {
+            throw new IllegalArgumentException("Either title or content must be provided.");
         }
+       Note note = noteMapper.toNote(request);
+       noteRepository.save(note);
+        return noteMapper.toNote(request);
     }
 
-    public List<Note> listAll() {
-        return new ArrayList<>(notes.values());
-    }
-
-    public Note add(Note note) {
-        note.setId(generateId());
-        notes.put(note.getId(), note);
-        return note;
-    }
-
-
+    @Transactional
     public void deleteById(Long id){
-        if(notes.containsKey(id)){
-            notes.remove(id);
-            System.out.println("Note removed");
-        } else {
-            throw new NoSuchElementException("Note not found");
-        }
+        noteRepository.deleteById(id);
+    }
+    @Transactional
+    public void update(Long id, NoteCreateRequest request) {
+        Note existingNote = noteRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Note not found with id " + id));
+        existingNote.setTitle(request.title());
+        existingNote.setContent(request.content());
+
+        noteRepository.save(existingNote);
     }
 
-    public void update (Note note) {
-        if(notes.containsKey(note.getId())){
-            notes.put(note.getId(), note);
-        } else {
-            throw new NoSuchElementException("Note not found");
-        }
-    }
-
-    public Note getById (Long id){
-        return notes.get(id);
+    public NoteResponse getById (Long id){
+        Note note = noteRepository.findById(id)
+                .orElseThrow(() -> new  EntityNotFoundException("Note with id " + id + " not found"));
+        return noteMapper.toNoteResponse(note);
     }
 
 }
