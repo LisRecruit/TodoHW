@@ -1,4 +1,4 @@
-package com.example.TodoHW.controlers;
+package com.example.TodoHW.controllers;
 
 import com.example.TodoHW.model.Note;
 import com.example.TodoHW.model.dto.NoteCreateRequest;

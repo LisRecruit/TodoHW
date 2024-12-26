@@ -1,4 +1,4 @@
-package com.example.TodoHW.controlers;
+package com.example.TodoHW.controllers;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
